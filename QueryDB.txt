@@ -1,0 +1,62 @@
+DROP DATABASE ugto;
+CREATE DATABASE UGTO;
+USE UGTO;
+
+CREATE TABLE Personas(
+	idPersona int not null auto_increment primary key,
+	Nombre varchar(25) not null,
+	ApellidoP VARCHAR(25) not null,
+	ApellidoM varchar(25) not  null,
+	Edad int,
+	Sexo varchar(25) not null,
+	RFC varchar(25) not null,
+	Correo varchar(50) not null,
+	Telefono varchar(50) not null,
+	CURP varchar(20) not null);
+
+
+CREATE TABLE Carrera(
+    idCarrera int not null auto_increment primary key,
+	Nombre varchar(50) not null);
+
+CREATE TABLE Alumnos(
+    NUA varchar(50) not null primary key,
+	idPersona int,
+	idCarrera int,
+	foreign key(idPersona) REFERENCES Personas (idPersona),
+	Semestre varchar(25) not null,
+	Promedio varchar(25) not null,
+	mensaje text);
+
+create table Administrativos(
+    NUE varchar(50) not null primary key, 
+	idPersona int,
+	Foreign key(idPersona) References Personas (idPersona),
+	pendientes text);
+
+create table estado(
+    idStatus int not null auto_increment primary key,
+	Status varchar(50) not null,
+	Descripcion text);
+    
+CREATE table Subarea(
+	idSubarea int not null AUTO_INCREMENT PRIMARY KEY,
+	nombreArea varchar (30));
+
+CREATE table actividad (
+    idActividad int not null auto_increment primary key,
+   	titulo varchar (200) not null,
+    descripcion text not null,
+    idSubarea int,
+    Foreign key(idSubarea) References Subarea (idSubarea),
+    idCarrera int,
+    Foreign key(idCarrera) References Carrera (idCarrera),
+    NUA int,
+    Foreign key(NUA) References Alumnos (NUA),  
+    fechaInicio date not null,
+    fechaFin date not null,
+    noHoras int not null,
+    organizador varchar (100),
+    evidencia blob,
+    idStatus int,
+    Foreign key(idStatus) References estados (idStatus));
