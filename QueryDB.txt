@@ -1,6 +1,12 @@
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
 DROP DATABASE ugto;
 CREATE DATABASE UGTO;
 USE UGTO;
+
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 CREATE TABLE Personas(
 	idPersona int not null auto_increment primary key,
@@ -8,11 +14,11 @@ CREATE TABLE Personas(
 	ApellidoP VARCHAR(25) not null,
 	ApellidoM varchar(25) not  null,
 	Edad int,
-	Sexo varchar(25) not null,
-	RFC varchar(25) not null,
+	Sexo varchar(1) not null, -- M = Masculino, F = Femenino, N = No binario
+	RFC varchar(12) not null,
 	Correo varchar(50) not null,
-	Telefono varchar(50) not null,
-	CURP varchar(20) not null);
+	Telefono varchar(10) not null,
+	CURP varchar(18) not null);
 
 
 CREATE TABLE Carrera(
@@ -20,19 +26,19 @@ CREATE TABLE Carrera(
 	Nombre varchar(50) not null);
 
 CREATE TABLE Alumnos(
-    NUA varchar(50) not null primary key,
+    NUA varchar(6) not null primary key,
 	idPersona int,
-	idCarrera int,
 	foreign key(idPersona) REFERENCES Personas (idPersona),
-	Semestre varchar(25) not null,
-	Promedio varchar(25) not null,
-	mensaje text);
+	idCarrera int,
+	Semestre varchar(2) not null,
+	Promedio varchar(5) not null,
+	mensaje varchar(200) Default "No tienes mensajes");
 
 create table Administrativos(
-    NUE varchar(50) not null primary key, 
+    NUE varchar(6) not null primary key, 
 	idPersona int,
 	Foreign key(idPersona) References Personas (idPersona),
-	pendientes text);
+	pendientes varchar (200) default "No hay pendientes");
 
 create table estado(
     idStatus int not null auto_increment primary key,
@@ -51,12 +57,78 @@ CREATE table actividad (
     Foreign key(idSubarea) References Subarea (idSubarea),
     idCarrera int,
     Foreign key(idCarrera) References Carrera (idCarrera),
-    NUA int,
+    NUA varchar(6),
     Foreign key(NUA) References Alumnos (NUA),  
     fechaInicio date not null,
     fechaFin date not null,
     noHoras int not null,
     organizador varchar (100),
     evidencia blob,
-    idStatus int,
+    idStatus varchar (1) DEFAULT '0', -- 0 = Enviado, 1 = Aceptado, 2 = Modificado, 3 = Rechazado
     Foreign key(idStatus) References estados (idStatus));
+
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+DELIMITER $$
+CREATE PROCEDURE sp_insertActividades(
+    in titulo varchar (200),
+    in descripcion text,
+    in idSubarea int,
+    in idCarrera int,
+    in NUA int,
+	in fechaInicio date,
+	in fechaFin date,
+	in noHoras int,
+	in organizador varchar (100),
+	in evidencia blob,
+	in idStatus varchar (1))
+BEGIN
+    INSERT into actividad (titulo, descripcion,idSubarea, idCarrera, NUA, fechaInicio, fechaFin, noHoras, organizador, evidencia, idStatus)
+    VALUES(UPPER(titulo), UPPER(descripcion),idSubarea, idCarrera, NUA, fechaInicio, fechaFin, noHoras, UPPER(organizador), evidencia, idStatus);
+END $$
+
+DELIMITER $$
+CREATE PROCEDURE sp_insertAlumnos(
+    in Nombre varchar(25),
+    in ApellidoP VARCHAR(25),
+    in ApellidoM varchar(25),
+    in Edad int,
+	in Sexo varchar(1),
+	in RFC varchar(12),
+	in Correo varchar(50),
+	in Telefono varchar(50),
+	in CURP varchar(18),
+	in idCarrera int,
+	in Semestre varchar(2),
+	in Promedio varchar(5) )
+BEGIN
+	-- Personas
+    INSERT into Personas (Nombre, ApellidoP, ApellidoM, Edad, Sexo, RFC, Correo, Telefono, CURP)
+    VALUES (UPPER(Nombre), UPPER(ApellidoP), UPPER(ApellidoM), Edad, Sexo, UPPER(RFC), Correo, Telefono, UPPER(CURP));
+    -- Alumnos
+    INSERT into Personas (NUA, idCarrera, Semestre, Promedio)
+    VALUES (NUA, idCarrera, Semestre, Promedio);
+END $$
+
+
+DELIMITER $$
+CREATE PROCEDURE sp_insertAdmin(
+    in Nombre varchar(25),
+    in ApellidoP VARCHAR(25),
+    in ApellidoM varchar(25),
+    in Edad int,
+	in Sexo varchar(1),
+	in RFC varchar(12),
+	in Correo varchar(50),
+	in Telefono varchar(50),
+	in CURP varchar(18),
+	in NUE varchar(6) )
+BEGIN
+	-- Personas
+    INSERT into Personas (Nombre, ApellidoP, ApellidoM, Edad, Sexo, RFC, Correo, Telefono, CURP)
+    VALUES (UPPER(Nombre), UPPER(ApellidoP), UPPER(ApellidoM), Edad, Sexo, UPPER(RFC), Correo, Telefono, UPPER(CURP));
+    -- Administrativos
+    INSERT into Personas (NUE)
+    VALUES (NUE);
+END $$
