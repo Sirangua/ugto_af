@@ -1,11 +1,13 @@
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- DATABASE
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-DROP DATABASE ugto;
+DROP DATABASE ugto; -- Delete when done
 CREATE DATABASE UGTO;
 USE UGTO;
 
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- TABLAS
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 CREATE TABLE Personas(
@@ -66,8 +68,21 @@ CREATE table actividad (
     evidencia blob,
     idStatus varchar (1) DEFAULT '0', 
     Foreign key(idStatus) References estados (idStatus));
+    
+CREATE TABLE avance (
+    idavance int not null AUTO_INCREMENT PRIMARY KEY,
+    NUA varchar(6),
+    Foreign key(NUA) References Alumnos (NUA),	
+    idSubarea int,
+    Foreign key(idSubarea) References Subarea (idSubarea),
+    creditos decimal (5,2) NOT null DEFAULT 0,
+    creditosFaltan decimal (5,2) not null,
+    noActividades int not null DEFAULT 0,
+    porcentaje int not null DEFAULT 0);
+    
 
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- STORED PROCEDURES
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 -- //////////////// Inserta una actividad
@@ -147,6 +162,7 @@ BEGIN
 END $$
     
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- Triggers
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
     
