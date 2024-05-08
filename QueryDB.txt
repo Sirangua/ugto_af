@@ -42,7 +42,7 @@ create table Administrativos(
 
 create table estado(
     idStatus int not null auto_increment primary key,
-	Status varchar(50) not null,
+	Status varchar(1) not null, -- 0 = Enviado, 1 = Aceptado, 2 = Modificado, 3 = Rechazado
 	Descripcion text);
     
 CREATE table Subarea(
@@ -64,12 +64,13 @@ CREATE table actividad (
     noHoras int not null,
     organizador varchar (100),
     evidencia blob,
-    idStatus varchar (1) DEFAULT '0', -- 0 = Enviado, 1 = Aceptado, 2 = Modificado, 3 = Rechazado
+    idStatus varchar (1) DEFAULT '0', 
     Foreign key(idStatus) References estados (idStatus));
 
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+-- //////////////// Inserta una actividad
 DELIMITER $$
 CREATE PROCEDURE sp_insertActividades(
     in titulo varchar (200),
@@ -88,6 +89,7 @@ BEGIN
     VALUES(UPPER(titulo), UPPER(descripcion),idSubarea, idCarrera, NUA, fechaInicio, fechaFin, noHoras, UPPER(organizador), evidencia, idStatus);
 END $$
 
+-- //////////////// Inserta un alumno
 DELIMITER $$
 CREATE PROCEDURE sp_insertAlumnos(
     in Nombre varchar(25),
@@ -111,7 +113,7 @@ BEGIN
     VALUES (NUA, idCarrera, Semestre, Promedio);
 END $$
 
-
+-- //////////////// Inserta un administrador
 DELIMITER $$
 CREATE PROCEDURE sp_insertAdmin(
     in Nombre varchar(25),
@@ -132,3 +134,21 @@ BEGIN
     INSERT into Personas (NUE)
     VALUES (NUE);
 END $$
+
+-- //////////////// Actualiza el estado de una actividad
+DELIMITER $$
+CREATE PROCEDURE sp_cambiarStatus(
+    in idAct int,
+    in nuevoStatus varchar(1))
+BEGIN
+    UPDATE actividad 
+    SET idStatus = nuevoStatus
+	WHERE idActividad = idAct;
+END $$
+    
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+    
+    
+    
