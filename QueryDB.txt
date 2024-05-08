@@ -2,7 +2,7 @@
 -- DATABASE
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-DROP DATABASE ugto; -- Delete when done
+DROP DATABASE UGTO; -- Delete when done
 CREATE DATABASE UGTO;
 USE UGTO;
 
@@ -44,17 +44,16 @@ create table Administrativos(
 
 create table estado(
     idStatus int not null auto_increment primary key,
-	Status varchar(1) not null, -- 0 = Enviado, 1 = Aceptado, 2 = Modificado, 3 = Rechazado
-	Descripcion text);
+	Descripcion varchar (25));
     
 CREATE table Subarea(
 	idSubarea int not null AUTO_INCREMENT PRIMARY KEY,
-	nombreArea varchar (30));
+	nombreArea varchar (35));
 
 CREATE table actividad (
     idActividad int not null auto_increment primary key,
    	titulo varchar (200) not null,
-    descripcion text not null,
+    descripcion varchar (500) not null,
     idSubarea int,
     Foreign key(idSubarea) References Subarea (idSubarea),
     idCarrera int,
@@ -66,7 +65,7 @@ CREATE table actividad (
     noHoras int not null,
     organizador varchar (100),
     evidencia blob,
-    idStatus varchar (1) DEFAULT '0', 
+    idStatus int DEFAULT 0, 
     Foreign key(idStatus) References estados (idStatus));
     
 CREATE TABLE avance (
@@ -89,7 +88,7 @@ CREATE TABLE avance (
 DELIMITER $$
 CREATE PROCEDURE sp_insertActividades(
     in titulo varchar (200),
-    in descripcion text,
+    in descripcion varchar (500),
     in idSubarea int,
     in idCarrera int,
     in NUA int,
@@ -97,11 +96,10 @@ CREATE PROCEDURE sp_insertActividades(
 	in fechaFin date,
 	in noHoras int,
 	in organizador varchar (100),
-	in evidencia blob,
-	in idStatus varchar (1))
+	in evidencia blob)
 BEGIN
-    INSERT into actividad (titulo, descripcion,idSubarea, idCarrera, NUA, fechaInicio, fechaFin, noHoras, organizador, evidencia, idStatus)
-    VALUES(UPPER(titulo), UPPER(descripcion),idSubarea, idCarrera, NUA, fechaInicio, fechaFin, noHoras, UPPER(organizador), evidencia, idStatus);
+    INSERT into actividad (titulo, descripcion,idSubarea, idCarrera, NUA, fechaInicio, fechaFin, noHoras, organizador, evidencia)
+    VALUES(UPPER(titulo), UPPER(descripcion),idSubarea, idCarrera, NUA, fechaInicio, fechaFin, noHoras, UPPER(organizador), evidencia);
 END $$
 
 -- //////////////// Inserta un alumno
@@ -154,17 +152,9 @@ END $$
 DELIMITER $$
 CREATE PROCEDURE sp_cambiarStatus(
     in idAct int,
-    in nuevoStatus varchar(1))
+    in nuevoStatus int)
 BEGIN
     UPDATE actividad 
     SET idStatus = nuevoStatus
 	WHERE idActividad = idAct;
 END $$
-    
--- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
--- Triggers
--- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-    
-    
-    
