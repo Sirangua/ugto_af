@@ -66,7 +66,7 @@ CREATE table actividad (
     organizador varchar (100),
     evidencia blob,
     idStatus int DEFAULT 0, 
-    Foreign key(idStatus) References estados (idStatus));
+    Foreign key(idStatus) References estado (idStatus));
     
 CREATE TABLE avance (
     idavance int not null AUTO_INCREMENT PRIMARY KEY,
@@ -114,6 +114,7 @@ CREATE PROCEDURE sp_insertAlumnos(
 	in Correo varchar(50),
 	in Telefono varchar(50),
 	in CURP varchar(18),
+	in NUA varchar (6),
 	in idCarrera int,
 	in Semestre varchar(2),
 	in Promedio varchar(5) )
@@ -158,3 +159,96 @@ BEGIN
     SET idStatus = nuevoStatus
 	WHERE idActividad = idAct;
 END $$
+
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- Insert on tables
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+-- Carreras
+INSERT INTO Carrera (Nombre) VALUES ("Ingeniería en comunicaciones y electrónica");
+INSERT INTO Carrera (Nombre) VALUES ("Ingeniería en sistemas computacionales");
+INSERT INTO Carrera (Nombre) VALUES ("Gestión empresarial");
+INSERT INTO Carrera (Nombre) VALUES ("Enseñanza del inglés");
+
+
+-- Areas
+INSERT INTO Subarea (nombreArea) VALUES ("Desarrollo personal");
+INSERT INTO Subarea (nombreArea) VALUES ("Responsabilidad social");
+INSERT INTO Subarea (nombreArea) VALUES ("Creatividad y espíritu emprendedor");
+INSERT INTO Subarea (nombreArea) VALUES ("Formación cultural e intercultural");
+INSERT INTO Subarea (nombreArea) VALUES ("Área complementaria");
+
+-- Estados
+INSERT INTO estado (Descripcion) VALUES ("Enviado");
+INSERT INTO estado (Descripcion) VALUES ("Aceptado");
+INSERT INTO estado (Descripcion) VALUES ("Modificado");
+INSERT INTO estado (Descripcion) VALUES ("Rechazado");
+
+
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- Funciones
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+-- Calcula cantidad de creditos faltantes al iniciar
+DELIMITER //
+CREATE FUNCTION calcularCredFal (idCarrera int, idSubarea int)
+RETURNS decimal (5,2)
+BEGIN
+	DECLARE pe varchar(50); 
+    DECLARE area varchar(30); 
+    SET pe = (SELECT Nombre FROM Carrera WHERE idCarrera = idCarrera);
+    SET area = (SELECT nombreArea FROM Subarea WHERE idSubarea = idSubarea);
+   
+    IF pe = "Enseñanza del inglés" THEN
+        IF area = "Desarrollo personal" THEN
+        	RETURN 2;
+        ELSEIF area = "Responsabilidad social" THEN
+        	RETURN 2;
+        ELSEIF area = "Creatividad y espíritu emprendedor" THEN
+        	RETURN 2;
+        ELSEIF area = "Formación cultural e intercultural" THEN
+        	RETURN 10;
+        ELSEIF area = "Área complementaria" THEN
+        	RETURN 0;
+        ELSE
+        	RETURN 0;
+        END IF;
+    ELSE
+    	IF area = "Desarrollo personal" THEN
+        	RETURN 2;
+        ELSEIF area = "Responsabilidad social" THEN
+        	RETURN 2;
+        ELSEIF area = "Creatividad y espíritu emprendedor" THEN
+        	RETURN 2;
+        ELSEIF area = "Formación cultural e intercultural" THEN
+        	RETURN 2;
+        ELSEIF area = "Área complementaria" THEN
+        	RETURN 5;
+        ELSE
+        	RETURN 0;
+        END IF;
+    END IF;
+END; //
+DELIMITER ;
+
+
+
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- Triggers
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+DELIMITER $$
+CREATE TRIGGER TR_InsertAvance
+	AFTER INSERT ON Alumnos
+	FOR EACH ROW
+BEGIN
+	DECLARE idCarrera_temp int;
+    SELECT idCarrera INTO idCarrera_temp FROM Alumnos WHERE NUA = NEW.NUA;
+    
+  	INSERT INTO avance (NUA, creditosFaltan)
+  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,1));
+END;
+$$
+    
+    
+    
