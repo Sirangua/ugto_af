@@ -91,7 +91,7 @@ CREATE PROCEDURE sp_insertActividades(
     in descripcion varchar (500),
     in idSubarea int,
     in idCarrera int,
-    in NUA int,
+    in NUA varchar (6),
 	in fechaInicio date,
 	in fechaFin date,
 	in noHoras int,
@@ -123,8 +123,10 @@ BEGIN
     INSERT into Personas (Nombre, ApellidoP, ApellidoM, Edad, Sexo, RFC, Correo, Telefono, CURP)
     VALUES (UPPER(Nombre), UPPER(ApellidoP), UPPER(ApellidoM), Edad, Sexo, UPPER(RFC), Correo, Telefono, UPPER(CURP));
     -- Alumnos
-    INSERT into Personas (NUA, idCarrera, Semestre, Promedio)
-    VALUES (NUA, idCarrera, Semestre, Promedio);
+
+	SET @idPersona = LAST_INSERT_ID();
+    INSERT into Alumnos (NUA, idPersona, idCarrera, Semestre, Promedio)
+    VALUES (NUA, @idPersona, idCarrera, Semestre, Promedio);
 END $$
 
 -- //////////////// Inserta un administrador
@@ -144,9 +146,11 @@ BEGIN
 	-- Personas
     INSERT into Personas (Nombre, ApellidoP, ApellidoM, Edad, Sexo, RFC, Correo, Telefono, CURP)
     VALUES (UPPER(Nombre), UPPER(ApellidoP), UPPER(ApellidoM), Edad, Sexo, UPPER(RFC), Correo, Telefono, UPPER(CURP));
+
+	SET @idPersona = LAST_INSERT_ID();
     -- Administrativos
-    INSERT into Personas (NUE)
-    VALUES (NUE);
+    INSERT into Administrativos (NUE, idPersona )
+    VALUES (NUE, @idPersona);
 END $$
 
 -- //////////////// Actualiza el estado de una actividad
@@ -247,8 +251,22 @@ BEGIN
     
   	INSERT INTO avance (NUA, creditosFaltan)
   	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,1));
+
+	INSERT INTO avance (NUA, creditosFaltan)
+  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,2));
+
+	INSERT INTO avance (NUA, creditosFaltan)
+  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,3));
+
+	INSERT INTO avance (NUA, creditosFaltan)
+  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,4));
+
+	INSERT INTO avance (NUA, creditosFaltan)
+  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,5));
 END;
 $$
     
-    
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+-- Call SP
+-- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     
