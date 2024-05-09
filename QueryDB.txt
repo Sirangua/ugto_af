@@ -195,15 +195,15 @@ INSERT INTO estado (Descripcion) VALUES ("Rechazado");
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 -- Calcula cantidad de creditos faltantes al iniciar
-DELIMITER //
-CREATE FUNCTION calcularCredFal (idCarrera int, idSubarea int)
+DELIMITER $$
+CREATE FUNCTION calcularCredFal (car int, sub int)
 RETURNS decimal (5,2)
 BEGIN
 	DECLARE pe varchar(50); 
     DECLARE area varchar(30); 
 	DECLARE creditos DECIMAL(5,2);
-    SET pe = (SELECT Nombre FROM Carrera WHERE idCarrera = idCarrera);
-    SET area = (SELECT nombreArea FROM Subarea WHERE idSubarea = idSubarea);
+    SET pe = (SELECT Nombre FROM Carrera WHERE idCarrera = car);
+    SET area = (SELECT nombreArea FROM Subarea WHERE idSubarea = sub);
    
     IF pe = "Enseñanza del inglés" THEN
         IF area = "Desarrollo personal" THEN
@@ -237,7 +237,7 @@ BEGIN
 	
 	RETURN creditos;
 
-END; //
+END $$
 DELIMITER ;
 
 
@@ -268,10 +268,11 @@ BEGIN
 
 	INSERT INTO avance (NUA, creditosFaltan)
   	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,5));
-END;
-$$
+END $$
+DELIMITER ;
     
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 -- Call SP
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
 
