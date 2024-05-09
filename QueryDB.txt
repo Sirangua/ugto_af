@@ -41,7 +41,8 @@ create table Administrativos(
     NUE varchar(6) not null primary key, 
 	idPersona int,
 	Foreign key(idPersona) References Personas (idPersona),
-	pendientes varchar (200) default "No hay pendientes");
+	pendientes int default 0,
+	mensajes varchar (250) default "No tienes revisiones pendientes");
 
 create table estado(
     idStatus int not null auto_increment primary key,
@@ -320,7 +321,45 @@ BEGIN
 END $$
 DELIMITER ;
 
-    
+--  Actualiza el mensaje del alumno
+DELIMITER $$
+CREATE TRIGGER TR_mensajeAlumno
+AFTER UPDATE ON actividad
+FOR EACH ROW
+BEGIN
+    IF NEW.idStatus = 1 THEN
+        UPDATE alumnos
+        SET mensaje = CONCAT("La actividad con ID", NEW.idActividad, "ha sido enviada")
+        WHERE NUA = NEW.NUA;
+    ELSEIF  NEW.idStatus = 2 THEN
+        UPDATE alumnos
+        SET mensaje = CONCAT("La actividad con ID", NEW.idActividad, "ha sido aceptada")
+        WHERE NUA = NEW.NUA;
+    ELSEIF  NEW.idStatus = 3 THEN
+        UPDATE alumnos
+        SET mensaje = CONCAT("La actividad con ID", NEW.idActividad, "ha sido modificada y aceptada")
+        WHERE NUA = NEW.NUA;
+    ELSEIF  NEW.idStatus = 4 THEN
+        UPDATE alumnos
+        SET mensaje = CONCAT("La actividad con ID", NEW.idActividad, "ha sido rechazada")
+        WHERE NUA = NEW.NUA;
+    END IF;
+END $$
+DELIMITER ;
+
+-- Actualiza el mensaje del administrativo
+DELIMITER $$
+CREATE TRIGGER TR_mensajeAdmin
+AFTER INSERT ON actividad
+FOR EACH ROW
+BEGIN
+    UPDATE administrativos
+    SET pendientes = pendientes + 1,
+    mensajes = CONCAT("Usted tiene ", pendientes, " por revisar");
+END $$
+DELIMITER ;
+
+
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 -- Call SP
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
