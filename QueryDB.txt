@@ -200,7 +200,7 @@ CREATE FUNCTION calcularCredFal (car int, sub int)
 RETURNS decimal (5,2)
 BEGIN
 	DECLARE pe varchar(50); 
-    DECLARE area varchar(30); 
+    DECLARE area varchar(50); 
 	DECLARE creditos DECIMAL(5,2);
     SET pe = (SELECT Nombre FROM Carrera WHERE idCarrera = car);
     SET area = (SELECT nombreArea FROM Subarea WHERE idSubarea = sub);
@@ -241,6 +241,19 @@ END $$
 DELIMITER ;
 
 
+-- Calcula porcentaje de avance
+DELIMITER $$
+CREATE FUNCTION calcularPorcentajeAvance (creditos decimal (5,2), creditosTotales decimal (5,2))
+RETURNS decimal(5,2)
+BEGIN
+    DECLARE porcentaje decimal(5,2);
+    SET porcentaje = (creditos / creditosTotales) * 100;
+    RETURN porcentaje;
+END $$
+DELIMITER ;
+
+
+
 
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 -- Triggers
@@ -254,20 +267,20 @@ BEGIN
 	DECLARE idCarrera_temp int;
     SELECT idCarrera INTO idCarrera_temp FROM Alumnos WHERE NUA = NEW.NUA LIMIT 1;
     
-  	INSERT INTO avance (NUA, creditosFaltan)
-  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,1));
+  	INSERT INTO avance (NUA, idSubarea, creditosFaltan)
+  	VALUES (NEW.NUA, 1, calcularCredFal(idCarrera_temp ,1));
 
-	INSERT INTO avance (NUA, creditosFaltan)
-  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,2));
+	INSERT INTO avance (NUA, idSubarea, creditosFaltan)
+  	VALUES (NEW.NUA, 2, calcularCredFal(idCarrera_temp ,2));
 
-	INSERT INTO avance (NUA, creditosFaltan)
-  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,3));
+	INSERT INTO avance (NUA, idSubarea, creditosFaltan)
+  	VALUES (NEW.NUA, 3, calcularCredFal(idCarrera_temp ,3));
 
-	INSERT INTO avance (NUA, creditosFaltan)
-  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,4));
+	INSERT INTO avance (NUA, idSubarea, creditosFaltan)
+  	VALUES (NEW.NUA, 4, calcularCredFal(idCarrera_temp ,4));
 
-	INSERT INTO avance (NUA, creditosFaltan)
-  	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,5));
+	INSERT INTO avance (NUA, idSubarea, creditosFaltan)
+  	VALUES (NEW.NUA, 5, calcularCredFal(idCarrera_temp ,5));
 END $$
 DELIMITER ;
     
