@@ -28,13 +28,14 @@ CREATE TABLE Carrera(
 	Nombre varchar(50) not null);
 
 CREATE TABLE Alumnos(
-    NUA varchar(6) not null primary key,
+    NUA varchar(6) primary key,
 	idPersona int,
-	foreign key(idPersona) REFERENCES Personas (idPersona),
 	idCarrera int,
 	Semestre varchar(2) not null,
 	Promedio varchar(5) not null,
-	mensaje varchar(200) Default "No tienes mensajes");
+	mensaje varchar(200) Default "No tienes mensajes",
+	foreign key(idPersona) REFERENCES Personas (idPersona),
+	foreign key(idCarrera) REFERENCES Carrera (idCarrera));
 
 create table Administrativos(
     NUE varchar(6) not null primary key, 
@@ -122,8 +123,8 @@ BEGIN
 	-- Personas
     INSERT into Personas (Nombre, ApellidoP, ApellidoM, Edad, Sexo, RFC, Correo, Telefono, CURP)
     VALUES (UPPER(Nombre), UPPER(ApellidoP), UPPER(ApellidoM), Edad, Sexo, UPPER(RFC), Correo, Telefono, UPPER(CURP));
-    -- Alumnos
 
+    -- Alumnos
 	SET @idPersona = LAST_INSERT_ID();
     INSERT into Alumnos (NUA, idPersona, idCarrera, Semestre, Promedio)
     VALUES (NUA, @idPersona, idCarrera, Semestre, Promedio);
@@ -200,38 +201,42 @@ RETURNS decimal (5,2)
 BEGIN
 	DECLARE pe varchar(50); 
     DECLARE area varchar(30); 
+	DECLARE creditos DECIMAL(5,2);
     SET pe = (SELECT Nombre FROM Carrera WHERE idCarrera = idCarrera);
     SET area = (SELECT nombreArea FROM Subarea WHERE idSubarea = idSubarea);
    
     IF pe = "Enseñanza del inglés" THEN
         IF area = "Desarrollo personal" THEN
-        	RETURN 2;
+        	SET creditos = 2;
         ELSEIF area = "Responsabilidad social" THEN
-        	RETURN 2;
+        	SET creditos = 2;
         ELSEIF area = "Creatividad y espíritu emprendedor" THEN
-        	RETURN 2;
+        	SET creditos = 2;
         ELSEIF area = "Formación cultural e intercultural" THEN
-        	RETURN 10;
+        	SET creditos = 10;
         ELSEIF area = "Área complementaria" THEN
-        	RETURN 0;
+        	SET creditos = 0;
         ELSE
-        	RETURN 0;
+        	SET creditos = 0;
         END IF;
     ELSE
     	IF area = "Desarrollo personal" THEN
-        	RETURN 2;
+        	SET creditos = 2;
         ELSEIF area = "Responsabilidad social" THEN
-        	RETURN 2;
+        	SET creditos = 2;
         ELSEIF area = "Creatividad y espíritu emprendedor" THEN
-        	RETURN 2;
+        	SET creditos = 2;
         ELSEIF area = "Formación cultural e intercultural" THEN
-        	RETURN 2;
+        	SET creditos = 2;
         ELSEIF area = "Área complementaria" THEN
-        	RETURN 5;
+        	SET creditos = 5;
         ELSE
-        	RETURN 0;
+        	SET creditos = 0;
         END IF;
     END IF;
+	
+	RETURN creditos;
+
 END; //
 DELIMITER ;
 
@@ -247,7 +252,7 @@ CREATE TRIGGER TR_InsertAvance
 	FOR EACH ROW
 BEGIN
 	DECLARE idCarrera_temp int;
-    SELECT idCarrera INTO idCarrera_temp FROM Alumnos WHERE NUA = NEW.NUA;
+    SELECT idCarrera INTO idCarrera_temp FROM Alumnos WHERE NUA = NEW.NUA LIMIT 1;
     
   	INSERT INTO avance (NUA, creditosFaltan)
   	VALUES (NEW.NUA, calcularCredFal(idCarrera_temp ,1));
@@ -269,4 +274,4 @@ $$
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 -- Call SP
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    
+
