@@ -329,19 +329,19 @@ FOR EACH ROW
 BEGIN
     IF NEW.idStatus = 1 THEN
         UPDATE alumnos
-        SET mensaje = CONCAT("La actividad con ID", NEW.idActividad, "ha sido enviada")
+        SET mensaje = CONCAT("La actividad con ID: ", NEW.idActividad, " ha sido enviada")
         WHERE NUA = NEW.NUA;
     ELSEIF  NEW.idStatus = 2 THEN
         UPDATE alumnos
-        SET mensaje = CONCAT("La actividad con ID", NEW.idActividad, "ha sido aceptada")
+        SET mensaje = CONCAT("La actividad con ID: ", NEW.idActividad, " ha sido aceptada")
         WHERE NUA = NEW.NUA;
     ELSEIF  NEW.idStatus = 3 THEN
         UPDATE alumnos
-        SET mensaje = CONCAT("La actividad con ID", NEW.idActividad, "ha sido modificada y aceptada")
+        SET mensaje = CONCAT("La actividad con ID: ", NEW.idActividad, " ha sido modificada y aceptada")
         WHERE NUA = NEW.NUA;
     ELSEIF  NEW.idStatus = 4 THEN
         UPDATE alumnos
-        SET mensaje = CONCAT("La actividad con ID", NEW.idActividad, "ha sido rechazada")
+        SET mensaje = CONCAT("La actividad con ID: ", NEW.idActividad, " ha sido rechazada")
         WHERE NUA = NEW.NUA;
     END IF;
 END $$
@@ -361,7 +361,34 @@ DELIMITER ;
 
 
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
--- Call SP
+-- Views
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+-- Mostrar lista de actividades por revisar
+CREATE VIEW listaPendientes AS 
+SELECT personas.Nombre, alumnos.NUA, actividad.titulo 
+FROM personas
+INNER JOIN alumnos ON personas.idPersona = alumnos.idPersona
+INNER JOIN actividad ON alumnos.NUA = actividad.NUA
+WHERE actividad.idStatus = 0;
 
+
+-- Mostrar avance del alumno
+CREATE VIEW resumeAvance AS 
+SELECT Subarea.nombreArea AS Area , avance.creditos as "Creditos aprobados", 
+avance.creditosFaltan as "Creditos por aprobar", avance.noActividades AS "Actividades aprobadas", 
+avance.porcentaje as "% Avance"
+FROM Subarea
+INNER JOIN avance ON Subarea.idSubarea = avance.idSubarea
+WHERE avance.NUA = "333333"; -- El NUA tiene que definirse mediante front
+
+
+-- Vista para validar las actividades
+CREATE VIEW revisarActividad AS 
+SELECT p.Nombre as "Nombre",  al.NUA, c.Nombre as "Carrera", s.nombreArea as "Area",  a.titulo as "Titulo", a.descripcion as "descripción", a.fechaInicio as "Inicio", a.fechaFin as "Fin", a.noHoras as "Horas", a.organizador, a.evidencia
+FROM personas as p
+INNER JOIN alumnos as al ON p.idPersona = al.idPersona
+INNER JOIN Carrera as c ON al.idCarrera= c.idCarrera
+LEFT JOIN actividad as a ON al.NUA = a.NUA
+INNER JOIN Subarea as s ON al.idCarrera= c.idCarrera
+WHERE a.idStatus = 0;
