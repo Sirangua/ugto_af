@@ -252,6 +252,18 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- Calcula los creditos a partir de horas
+DELIMITER $$
+CREATE FUNCTION horascredito (hours int)
+RETURNS decimal(5,2)
+BEGIN
+    DECLARE creditos decimal(5,2);
+    SET creditos = (1/25)*hours;
+    RETURN creditos;
+END $$
+DELIMITER ;
+
+
 
 
 
@@ -283,6 +295,31 @@ BEGIN
   	VALUES (NEW.NUA, 5, calcularCredFal(idCarrera_temp ,5));
 END $$
 DELIMITER ;
+
+-- Actualiza el avance cuando una actividad es aceptada
+DELIMITER $$
+CREATE TRIGGER TR_updateAvance
+AFTER UPDATE ON actividad
+FOR EACH ROW
+BEGIN
+    DECLARE nuevaCantidad DECIMAL(5,2);
+    SET nuevaCantidad = horascredito(NEW.noHoras);
+    
+    IF NEW.idStatus = 2 OR NEW.idStatus = 3 THEN
+        UPDATE avance
+        SET creditos = creditos + nuevaCantidad,
+            creditosFaltan = creditosFaltan - nuevaCantidad,
+            noActividades = noActividades + 1,
+            porcentaje = calcularPorcentajeAvance(creditos, calcularCredFal(NEW.idCarrera, NEW.idSubarea))
+        WHERE NUA = NEW.NUA AND idSubarea = NEW.idSubarea;
+    ELSE
+        UPDATE alumnos
+        SET mensaje = "Actividad rechazada"
+        WHERE NUA = NEW.NUA;
+    END IF;
+END $$
+DELIMITER ;
+
     
 -- \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 -- Call SP
